@@ -43,7 +43,7 @@ public class RedBlackTreePainter {
             int y = curHeight * 2;
             String strHeight = String.valueOf(nodeHeight.node.getValue());
             if (nodeHeight.node.getColor() == Color.RED) {
-                appendAnsi[curHeight].add(new Pair<>(widthIter, ANSI_RED));
+                appendAnsi[y].add(new Pair<>(widthIter, ANSI_RED));
             }
             for (int i = 0; i < strHeight.length(); i++) {
                 map[y][widthIter++] = strHeight.charAt(i);
