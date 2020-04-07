@@ -1,5 +1,9 @@
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class Node {
+    private final String guid;
     private Node parent;
     private Color color;
     private final Map<TypeChild, Node> childs;
@@ -12,6 +16,11 @@ public class Node {
         for (TypeChild typeChild : TypeChild.values()) {
             childs.put(typeChild, null);
         }
+        this.guid = UUID.randomUUID().toString();
+    }
+
+    public String getGuid() {
+        return guid;
     }
 
     public Color getParentColor() {
@@ -64,3 +73,38 @@ public class Node {
     public Node getChild(TypeChild typeChild) {
         return childs.get(typeChild);
     }
+
+    public void setChild(Node node) {
+        TypeChild typeChild = node.value > value ? TypeChild.RIGHT : TypeChild.LEFT;
+        setChild(node, typeChild);
+    }
+
+    public void setChild(Node node, TypeChild typeChild) {
+        childs.put(typeChild, node);
+        if (node != null) {
+            node.parent = this;
+        }
+    }
+
+    public void setNil(TypeChild typeChild) {
+        childs.put(typeChild, null);
+    }
+
+    public boolean childIsNil(TypeChild typeChild) {
+        return getChild(typeChild) == null;
+    }
+
+    public TypeChild type() {
+        if (parent == null) {
+            return null;
+        }
+        return value > parent.value ? TypeChild.RIGHT : TypeChild.LEFT;
+    }
+
+    public void setParent(Node node) {
+        parent = node;
+        if (parent != null) {
+            parent.childs.put(type(), this);
+        }
+    }
+}

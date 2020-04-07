@@ -1,5 +1,6 @@
 public class RedBlackTree {
     private Node root;
+    private int count;
 
     public RedBlackTree() {
     }
@@ -10,10 +11,25 @@ public class RedBlackTree {
         }
     }
 
+    public void setRoot(Node node) {
+        root = node;
+        root.setColor(Color.BLACK);
+    }
+
+    public Node getRoot() {
+        return root;
+    }
+
+    public int getCount() {
+        return count;
+    }
+
     public void add(int value) {
+        count++;
+
         Node node = new Node(value);
         if (root == null) {
-            root = node;
+            setRoot(node);
             return;
         }
 
@@ -42,7 +58,9 @@ public class RedBlackTree {
             Node grandParent = node.getGrandParent();
             if (node.getUncleColor() == Color.RED) {
                 setColor(node.getParent(), Color.BLACK);
-                setColor(grandParent, Color.RED);
+                if (grandParent.getParent() != null) {
+                    setColor(grandParent, Color.RED);
+                }
                 setColor(node.getUncle(), Color.BLACK);
                 correctViolations(grandParent);
             } else {
@@ -58,13 +76,12 @@ public class RedBlackTree {
                 }
                 if (parent.type() == TypeChild.RIGHT) {
                     grandParent = rotateToLeft(grandParent);
-                    parent = grandParent.getChild(TypeChild.RIGHT);
+                    grandParent.getChild(TypeChild.LEFT).setColor(Color.RED);
                 } else {
                     grandParent = rotateToRight(grandParent);
-                    parent = grandParent.getChild(TypeChild.LEFT);
+                    grandParent.getChild(TypeChild.RIGHT).setColor(Color.RED);
                 }
                 grandParent.setColor(Color.BLACK);
-                parent.setColor(Color.RED);
             }
         }
     }
@@ -80,12 +97,12 @@ public class RedBlackTree {
         Node nodeLeft = node.getChild(TypeChild.LEFT);
         Node nodeMid = nodeLeft.getChild(TypeChild.RIGHT);
 
-        nodeMid.setParent(node);
-        node.setParent(nodeLeft);
+        node.setChild(nodeMid, TypeChild.LEFT);
+        nodeLeft.setChild(node, TypeChild.RIGHT);
         nodeLeft.setParent(nodeParent);
 
         if (nodeLeft.getParent() == null) {
-            root = nodeLeft;
+            setRoot(nodeLeft);
         }
 
         return nodeLeft;
@@ -96,12 +113,12 @@ public class RedBlackTree {
         Node nodeRight = node.getChild(TypeChild.RIGHT);
         Node nodeMid = nodeRight.getChild(TypeChild.LEFT);
 
-        nodeMid.setParent(node);
-        node.setParent(nodeRight);
+        node.setChild(nodeMid, TypeChild.RIGHT);
+        nodeRight.setChild(node, TypeChild.LEFT);
         nodeRight.setParent(nodeParent);
 
         if (nodeRight.getParent() == null) {
-            root = nodeRight;
+            setRoot(nodeRight);
         }
 
         return nodeRight;
