@@ -1,5 +1,6 @@
-import java.util.HashSet;
-import java.util.Set;
+import javafx.util.Pair;
+
+import java.util.*;
 
 public class RedBlackTreePainter {
     private static final String ANSI_BLACK = "\u001B[30m";
@@ -33,18 +34,33 @@ public class RedBlackTreePainter {
         }
 
         int widthIter = 0;
+        List<Pair<Integer, String>>[] appendAnsi = new List[height];
+        for (int i = 0; i < height; i++) {
+            appendAnsi[i] = new ArrayList<>();
+        }
         for (NodeHeight nodeHeight : heights) {
             int curHeight = nodeHeight.height;
             int y = curHeight * 2;
             String strHeight = String.valueOf(nodeHeight.node.getValue());
+            if (nodeHeight.node.getColor() == Color.RED) {
+                appendAnsi[curHeight].add(new Pair<>(widthIter, ANSI_RED));
+            }
             for (int i = 0; i < strHeight.length(); i++) {
                 map[y][widthIter++] = strHeight.charAt(i);
+            }
+            if (nodeHeight.node.getColor() == Color.RED) {
+                appendAnsi[y].add(new Pair<>(widthIter, ANSI_RESET));
             }
             widthIter++;
         }
 
         for (int i = 0; i < height; i++) {
-            System.out.println(map[i]);
+            StringBuilder sb = new StringBuilder(new String(map[i]));
+            for (int j = appendAnsi[i].size() - 1; j >= 0; j--) {
+                Pair<Integer, String> pair = appendAnsi[i].get(j);
+                sb.insert(pair.getKey(), pair.getValue());
+            }
+            System.out.println(sb);
         }
     }
 
