@@ -38,21 +38,29 @@ public class RedBlackTreePainter {
         for (int i = 0; i < height; i++) {
             appendAnsi[i] = new ArrayList<>();
         }
+        Map<String, NodePoint> nodeConnections = new HashMap<>();
         for (NodeHeight nodeHeight : heights) {
             int curHeight = nodeHeight.height;
             int y = curHeight * 2;
-            String strHeight = String.valueOf(nodeHeight.node.getValue());
-            if (nodeHeight.node.getColor() == Color.RED) {
+            Node node = nodeHeight.node;
+            String strHeight = String.valueOf(node.getValue());
+            if (node.getColor() == Color.RED) {
                 appendAnsi[y].add(new Pair<>(widthIter, ANSI_RED));
             }
+            int x = widthIter + strHeight.length() / 2;
+            if (strHeight.length() % 2 == 0 && node.type() != TypeChild.LEFT) {
+                x--;
+            }
+            nodeConnections.put(node.getGuid(), new NodePoint(node, x, y));
             for (int i = 0; i < strHeight.length(); i++) {
                 map[y][widthIter++] = strHeight.charAt(i);
             }
-            if (nodeHeight.node.getColor() == Color.RED) {
+            if (node.getColor() == Color.RED) {
                 appendAnsi[y].add(new Pair<>(widthIter, ANSI_RESET));
             }
             widthIter++;
         }
+        paintConnections(nodeConnections, map);
 
         for (int i = 0; i < height; i++) {
             StringBuilder sb = new StringBuilder(new String(map[i]));
@@ -61,6 +69,54 @@ public class RedBlackTreePainter {
                 sb.insert(pair.getKey(), pair.getValue());
             }
             System.out.println(sb);
+        }
+    }
+
+    private static void paintConnections(Map<String, NodePoint> nodeConnections, char[][] map) {
+        for (NodePoint nodePoint : nodeConnections.values()) {
+            Point startPair = nodePoint.getBottomPoint();
+            int startX = startPair.x;
+            int startY = startPair.y;
+            Node node = nodePoint.node;
+            Node leftChild = node.getChild(TypeChild.LEFT);
+            Point leftNodePoint = leftChild != null
+                    ? nodeConnections.get(leftChild.getGuid()).getTopPoint()
+                    : null;
+            Node rightChild = node.getChild(TypeChild.RIGHT);
+            Point rightNodePoint = rightChild != null
+                    ? nodeConnections.get(rightChild.getGuid()).getTopPoint()
+                    : null;
+            if (leftChild != null && rightChild != null) {
+                map[startY][startX] = '╩';
+                paintConnection(map, startX - 1, startY, leftNodePoint.x, leftNodePoint.y);
+                paintConnection(map, startX + 1, startY, rightNodePoint.x, rightNodePoint.y);
+            } else if (leftChild != null) {
+                map[startY][startX] = '╝';
+                paintConnection(map, startX - 1, startY, leftNodePoint.x, leftNodePoint.y);
+            } else if (rightChild != null) {
+                map[startY][startX] = '╚';
+                paintConnection(map, startX + 1, startY, rightNodePoint.x, rightNodePoint.y);
+            }
+        }
+    }
+
+    private static void paintConnection(char[][] map, int x1, int y1, int x2, int y2) {
+        if (y1 <= y2) {
+            int temp = y1;
+            y1 = y2;
+            y2 = temp;
+            temp = x1;
+            x1 = x2;
+            x2 = temp;
+        }
+        int minX = Math.min(x1, x2);
+        int maxX = Math.max(x1, x2);
+        for (int i = minX; i <= maxX; i++) {
+            map[y2][i] = '═';
+        }
+        map[y2][x1] = x1 < x2 ? '╔' : '╗';
+        for (int i = y2 + 1; i <= y1; i++) {
+            map[i][x1] = '║';
         }
     }
 
@@ -105,21 +161,35 @@ public class RedBlackTreePainter {
             this.node = node;
             this.height = height;
         }
+    }
 
-        public Node getNode() {
-            return node;
-        }
+    static class NodePoint {
+        private final Node node;
+        private final int x;
+        private final int y;
 
-        public void setNode(Node node) {
+        public NodePoint(Node node, int centerX, int centerY) {
             this.node = node;
+            this.x = centerX;
+            this.y = centerY;
         }
 
-        public int getHeight() {
-            return height;
+        public Point getTopPoint() {
+            return new Point(x, y - 1);
         }
 
-        public void setHeight(int height) {
-            this.height = height;
+        public Point getBottomPoint() {
+            return new Point(x, y + 1);
+        }
+    }
+
+    static class Point {
+        private final int x;
+        private final int y;
+
+        public Point(int x, int y) {
+            this.x = x;
+            this.y = y;
         }
     }
 }
