@@ -9,6 +9,8 @@ public class Program {
         redBlackTree.add(6);
         redBlackTree.add(7);
         redBlackTree.add(8);
+        redBlackTree.remove(3);
+        redBlackTree.remove(5);
         RedBlackTreePainter.paint(redBlackTree);
     }
 }
